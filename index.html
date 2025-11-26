@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>暗系卡通省考倒计时（含实时时间）</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Comic Sans MS", "幼圆", "微软雅黑", sans-serif;
+        }
+        /* 暗系背景：比国考稍浅，增加区分度 */
+        body {
+            background-color: #1e2234;
+            padding: 10px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+        }
+        /* 整体容器：圆角更大，增加省考辨识度 */
+        .countdown-container {
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: #252b42;
+            border-radius: 16px;
+            padding: 12px 12px 20px;
+            box-shadow: 0 0 18px rgba(255, 235, 59, 0.12);
+            position: relative;
+        }
+        /* 省考标题：荧光黄主色，区别国考荧光青 */
+        .main-title {
+            text-align: center;
+            color: #ffeb3b;
+            font-size: 16px;
+            margin-bottom: 6px;
+            text-shadow: 0 0 10px #ffeb3b;
+        }
+        /* 实时时间+星期：荧光黄，与标题呼应 */
+        .current-time {
+            text-align: center;
+            color: #ffeb3b;
+            font-size: 14px;
+            margin-bottom: 12px;
+            text-shadow: 0 0 7px #ffeb3b;
+        }
+        /* 横向卡片布局：间距稍大，更通透 */
+        .exam-row {
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        /* 省考卡片：底色、边框换色，加卡通小装饰 */
+        .exam-card {
+            flex: 1;
+            min-width: 200px;
+            background-color: #1a3a6c;
+            border-radius: 12px;
+            padding: 10px;
+            border: 2px dashed #4a90e2;
+            box-shadow: 0 0 12px rgba(74, 144, 226, 0.2);
+            position: relative;
+        }
+        /* 省考专属卡通装饰（小旗帜图标） */
+        .exam-card::before {
+            content: "🚩";
+            font-size: 18px;
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            opacity: 0.5;
+            color: #ffeb3b;
+        }
+        /* 卡片标题：荧光蓝，区别国考荧光紫 */
+        .exam-year {
+            color: #4a90e2;
+            font-size: 14px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #4a90e2;
+            padding-bottom: 4px;
+        }
+        /* 笔试时间提示：浅灰偏暖，更柔和 */
+        .exam-date {
+            color: #f0f0f0;
+            font-size: 11px;
+            margin-bottom: 10px;
+            opacity: 0.85;
+        }
+        /* 倒计时容器：荧光粉主色，区别国考荧光绿 */
+        .countdown {
+            font-weight: bold;
+            color: #ff69b4;
+            text-shadow: 0 0 8px #ff69b4;
+        }
+        /* 倒计时天数：更大号，更突出 */
+        .countdown-days {
+            font-size: 24px;
+            margin-right: 6px;
+        }
+        /* 倒计时时分秒：小号，补0对齐 */
+        .countdown-hms {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        /* 省考备考提示：颜色偏暖，内容适配省考 */
+        .exam-tips {
+            color: #e0e8f0;
+            font-size: 10px;
+            margin-top: 8px;
+            line-height: 1.3;
+            background-color: rgba(74, 144, 226, 0.1);
+            padding: 5px;
+            border-radius: 6px;
+        }
+        /* 临近提醒：荧光粉闪烁，区别国考荧光绿闪烁 */
+        .alert {
+            animation: flash 1.2s infinite alternate;
+        }
+        @keyframes flash {
+            from { text-shadow: 0 0 8px #ff69b4; }
+            to { text-shadow: 0 0 15px #ff69b4, 0 0 22px #ff69b4; }
+        }
+        
+        /* 底部署名样式 - 紧贴容器底部 */
+        .footer {
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 10px;
+            padding: 2px 0;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                padding: 8px;
+            }
+            
+            .countdown-container {
+                padding: 10px 10px 18px;
+            }
+            
+            .exam-row {
+                gap: 8px;
+            }
+            
+            .exam-card {
+                min-width: 170px;
+                padding: 8px;
+            }
+            
+            .main-title {
+                font-size: 15px;
+                margin-bottom: 5px;
+            }
+            
+            .current-time {
+                font-size: 13px;
+                margin-bottom: 10px;
+            }
+            
+            .exam-year {
+                font-size: 13px;
+            }
+            
+            .countdown-days {
+                font-size: 22px;
+            }
+            
+            .exam-card::before {
+                font-size: 16px;
+                top: 8px;
+                right: 10px;
+            }
+            
+            .footer {
+                bottom: 4px;
+                font-size: 9px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            
+            .countdown-container {
+                padding: 8px 8px 16px;
+            }
+            
+            .exam-row {
+                gap: 6px;
+            }
+            
+            .exam-card {
+                min-width: 150px;
+                padding: 6px;
+            }
+            
+            .main-title {
+                font-size: 14px;
+            }
+            
+            .current-time {
+                font-size: 12px;
+            }
+            
+            .exam-year {
+                font-size: 12px;
+            }
+            
+            .countdown-days {
+                font-size: 20px;
+            }
+            
+            .countdown-hms {
+                font-size: 11px;
+            }
+            
+            .exam-tips {
+                font-size: 9px;
+            }
+            
+            .exam-card::before {
+                font-size: 14px;
+                top: 6px;
+                right: 8px;
+            }
+            
+            .footer {
+                bottom: 3px;
+                font-size: 8px;
+            }
+        }
+        
+        /* 小屏幕手机 */
+        @media (max-width: 360px) {
+            .exam-card {
+                min-width: 140px;
+            }
+            
+            .countdown-days {
+                font-size: 18px;
+            }
+            
+            .countdown-hms {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="countdown-container">
+        <h3 class="main-title">✨ 省考（联考）自动更新倒计时 ✨</h3>
+        <!-- 实时时间+星期：与标题同色 -->
+        <div class="current-time" id="current-time">2024年10月06日 星期日 12:00:00</div>
+        <div class="exam-row">
+            <!-- 第一组省考：自动更新年份 -->
+            <div class="exam-card">
+                <h4 class="exam-year" id="exam1-year">2026年省考（联考）</h4>
+                <div class="exam-date" id="exam1-date">笔试：2026年3月下旬（预计）</div>
+                <!-- 倒计时：天数大+时分秒小 -->
+                <div class="countdown" id="exam1-count">
+                    <span class="countdown-days">0</span>
+                    <span class="countdown-hms">天 00时00分00秒</span>
+                </div>
+                <div class="exam-tips">💡 备考：联考省份共享资料，重点练本省特色题型（如江苏申论）</div>
+            </div>
+
+            <!-- 第二组省考：自动更新年份 -->
+            <div class="exam-card">
+                <h4 class="exam-year" id="exam2-year">2027年省考（联考）</h4>
+                <div class="exam-date" id="exam2-date">笔试：2027年3月下旬（预计）</div>
+                <!-- 倒计时：天数大+时分秒小 -->
+                <div class="countdown" id="exam2-count">
+                    <span class="countdown-days">0</span>
+                    <span class="countdown-hms">天 00时00分00秒</span>
+                </div>
+                <div class="exam-tips">💡 备考：零基础先学《行测》《申论》教材，2026年9月启动刷题</div>
+            </div>
+        </div>
+        
+        <!-- 底部署名 - 紧贴容器底部 -->
+        <div class="footer" id="footer">
+            © <span id="current-year">2025</span> 南离知识集
+        </div>
+    </div>
+
+    <script>
+        // 1. 实时更新当前时间+星期
+        function updateCurrentTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const date = String(now.getDate()).padStart(2, '0');
+            const weekArr = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            const week = weekArr[now.getDay()];
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            const timeText = `${year}年${month}月${date}日 ${week} ${hours}:${minutes}:${seconds}`;
+            document.getElementById('current-time').textContent = timeText;
+        }
+
+        // 2. 省考时间规则：联考多在3月下旬，考年=笔试年份
+        function getNextExamInfo(baseYearOffset) {
+            const now = new Date();
+            let examYear = now.getFullYear() + baseYearOffset; // 省考：考年=笔试年份
+            let writtenMonth = 2; // 3月（月份0开始）
+            // 计算3月下旬（默认3月23日，联考常见时间）
+            let writtenDate = new Date(examYear, writtenMonth, 23, 9, 0, 0);
+            
+            // 若当前时间已过当年省考（如4月后），自动+1年
+            if (now > writtenDate) {
+                examYear += 1;
+                writtenDate.setFullYear(examYear);
+            }
+
+            return { 
+                examYear: examYear,
+                writtenDate: writtenDate,
+                dateText: `${examYear}年3月下旬（联考预计）` 
+            };
+        }
+
+        // 3. 更新省考倒计时
+        function updateCountdown() {
+            const exams = [
+                { id: "exam1", baseOffset: 1 }, // 下一年省考（如2024→2025）
+                { id: "exam2", baseOffset: 2 }  // 下下年省考（如2024→2026）
+            ];
+
+            exams.forEach(exam => {
+                const info = getNextExamInfo(exam.baseOffset);
+                const yearEl = document.getElementById(`${exam.id}-year`);
+                const dateEl = document.getElementById(`${exam.id}-date`);
+                const countEl = document.getElementById(`${exam.id}-count`);
+                const diff = info.writtenDate - new Date();
+
+                // 更新年份和日期文本
+                yearEl.textContent = `${info.examYear}年省考（联考）`;
+                dateEl.textContent = `笔试：${info.dateText}`;
+
+                // 拆分倒计时（天数大+时分秒小）
+                if (diff <= 0) {
+                    countEl.innerHTML = `<span class="countdown-days">⏰</span><span class="countdown-hms"> 自动更新中...</span>`;
+                    countEl.classList.add("alert");
+                } else {
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const hours = String(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+                    const minutes = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+                    const seconds = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
+
+                    countEl.innerHTML = `
+                        <span class="countdown-days">${days}</span>
+                        <span class="countdown-hms">天 ${hours}时${minutes}分${seconds}秒</span>
+                    `;
+                    // 不足60天闪烁（省考备考周期长，提前提醒）
+                    days < 60 ? countEl.classList.add("alert") : countEl.classList.remove("alert");
+                }
+            });
+        }
+        
+        // 4. 更新底部年份
+        function updateFooterYear() {
+            const currentYear = new Date().getFullYear();
+            document.getElementById('current-year').textContent = currentYear;
+        }
+
+        // 初始化+每秒同步更新
+        updateCurrentTime();
+        updateCountdown();
+        updateFooterYear();
+        setInterval(() => {
+            updateCurrentTime();
+            updateCountdown();
+        }, 1000);
+    </script>
+</body>
+</html>
